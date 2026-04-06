@@ -1,0 +1,198 @@
+// This is your Prisma schema file
+// Multi-tenant Project Management SaaS
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── TENANT / COMPANY ──────────────────────────────────────────────────────
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  logo        String?
+  plan        String   @default("FREE")   // FREE | PRO | ENTERPRISE
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     Member[]
+  projects    Project[]
+  invitations Invitation[]
+}
+
+// ─── USERS ─────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  memberships   Member[]
+  assignedTasks Task[]    @relation("TaskAssignee")
+  comments      Comment[]
+  activities    Activity[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── MEMBERSHIP ────────────────────────────────────────────────────────────
+
+model Member {
+  id        String   @id @default(cuid())
+  userId    String
+  companyId String
+  role      String   @default("MEMBER")  // OWNER | ADMIN | MEMBER | VIEWER
+  joinedAt  DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, companyId])
+}
+
+model Invitation {
+  id        String   @id @default(cuid())
+  email     String
+  companyId String
+  role      String   @default("MEMBER")  // OWNER | ADMIN | MEMBER | VIEWER
+  token     String   @unique @default(cuid())
+  status    String   @default("PENDING") // PENDING | ACCEPTED | EXPIRED
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+// ─── PROJECTS ──────────────────────────────────────────────────────────────
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  color       String   @default("#4c6ef5")
+  icon        String   @default("folder")
+  status      String   @default("ACTIVE") // ACTIVE | ARCHIVED | COMPLETED
+  companyId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company    Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  columns    Column[]
+  tasks      Task[]
+  activities Activity[]
+}
+
+// ─── COLUMNS (Board Columns / Statuses) ───────────────────────────────────
+
+model Column {
+  id        String  @id @default(cuid())
+  name      String
+  color     String  @default("#e9ecef")
+  order     Int
+  projectId String
+  isDefault Boolean @default(false)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks   Task[]
+}
+
+// ─── TASKS ─────────────────────────────────────────────────────────────────
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  priority    String    @default("MEDIUM") // LOW | MEDIUM | HIGH | URGENT
+  order       Int       @default(0)
+  dueDate     DateTime?
+  completedAt DateTime?
+  labels      String?   // JSON array of label strings
+  columnId    String
+  projectId   String
+  assigneeId  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  column     Column     @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee   User?      @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  comments   Comment[]
+  activities Activity[]
+}
+
+// ─── COMMENTS ──────────────────────────────────────────────────────────────
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  taskId    String
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+// ─── ACTIVITY LOG ──────────────────────────────────────────────────────────
+
+model Activity {
+  id        String   @id @default(cuid())
+  type      String   // PROJECT_CREATED | TASK_CREATED | TASK_MOVED | TASK_COMPLETED | COMMENT_ADDED | MEMBER_JOINED | MEMBER_INVITED
+  data      String?  // JSON metadata
+  userId    String
+  projectId String?
+  taskId    String?
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task    Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
