@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('🌱 Seeding database...')
+  console.log('Seeding database...')
 
   // Create demo company
   const company = await prisma.company.upsert({
@@ -176,7 +176,7 @@ async function main() {
     })
   }
 
-  console.log('✅ Seed complete!')
+  console.log('Seed complete!')
   console.log('Demo login: admin@acme.com / demo1234')
 }
 

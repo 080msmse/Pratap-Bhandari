@@ -1,79 +1,91 @@
-# Hi there, I'm Pratap! 👋 🔬
+# ProjectFlow — Project Management SaaS
 
-Welcome to my digital research space! I'm a passionate **Master's Student in Material Science** at **Tribhuvan University, Institute of Engineering, Pulchowk Campus**. I'm deeply fascinated by the intersection of computational materials science and data-driven discovery.
+A full-stack Monday.com-style project management SaaS built with Next.js 14, Prisma, NextAuth, and Tailwind CSS.
 
-## 🧪 About Me
+## Features
 
-- 🎓 **Master's Student** in Material Science at **IOE, Pulchowk Campus**, Tribhuvan University.
-- 🔬 **Research Interests:** 
-  - **Density Functional Theory (DFT)** for predicting material properties
-  - **Machine Learning** in Materials Science (ML-MS)
-  - High-throughput computational materials design
-  - Development of novel functional materials
-- 🌱 **Currently Learning:** Advanced DFT methodologies, ML force fields, and materials informatics tools.
-- 💡 **Looking to Collaborate** on: DFT calculations, ML-based materials prediction projects, or open-source scientific software.
-- 📫 **How to reach me:** [Your Email] | [LinkedIn Profile]
-- ⚡ **Fun fact:** I believe the next groundbreaking material discovery will come from a perfect blend of quantum mechanics and artificial intelligence!
+- **Multi-tenant** — each company gets its own isolated workspace
+- **Kanban Board** — drag & drop tasks between columns
+- **List View** — sortable table layout
+- **Task Detail Modal** — description, comments, priority, assignee, due date
+- **Dashboard** — stats, activity feed, completion progress
+- **Calendar View** — monthly calendar with task due dates
+- **Reports** — priority breakdown, per-project progress
+- **Team Management** — invite members, role-based access (Owner/Admin/Member/Viewer)
+- **Settings** — workspace config, billing plans, integrations
+- **Landing Page** — full marketing page with pricing
 
-## 🛠️ Technical Toolkit
+## Tech Stack
 
-### **Computational Materials Science**
-[![My Skills](https://skillicons.dev/icons?i=python,cpp)] &nbsp;
-**DFT Codes:** VASP, Quantum ESPRESSO, ABINIT  
-**Materials Analysis:** pymatgen, ASE (Atomic Simulation Environment), VESTA
+- **Next.js 14** (App Router, Server Components)
+- **TypeScript**
+- **Prisma ORM + SQLite** (easily swappable to PostgreSQL)
+- **NextAuth.js** — JWT auth with credentials provider
+- **Tailwind CSS** — custom design system
+- **@hello-pangea/dnd** — drag-and-drop Kanban
 
-### **Machine Learning & Data Science**
-[![My Skills](https://skillicons.dev/icons?i=python,tensorflow,pytorch)] &nbsp;
-**Libraries:** scikit-learn, Matplotlib, Pandas, NumPy, SciPy  
-**ML Areas:** Regression models, Neural Networks, Materials Property Prediction
+## Getting Started
 
-### **Scientific Computing & Tools**
-[![My Skills](https://skillicons.dev/icons?i=linux,bash,git,github,vscode)] &nbsp;
-**High-Performance Computing (HPC)**  
-**Data Visualization:** OriginLab, Matplotlib, Seaborn
+```bash
+# 1. Clone and install
+git clone https://github.com/080msmse/pratap-bhandari.git
+cd pratap-bhandari
+npm install
 
-## 📈 GitHub Stats
+# 2. Set up environment
+cp .env.example .env.local
 
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=YOUR_GITHUB_USERNAME&show_icons=true&theme=dark&hide_border=true" alt="GitHub Stats" />
-  <br/>
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=YOUR_GITHUB_USERNAME&layout=compact&theme=dark&hide_border=true" alt="Top Languages" />
-</p>
+# 3. Set up database
+npm run db:push
+npm run db:seed   # loads demo data
 
-## 🚀 Featured Projects
+# 4. Start development server
+npm run dev
+```
 
-### **[DFT-ML Pipeline for Material Property Prediction](https://github.com/YOUR_USERNAME/PROJECT_REPO)**
-A comprehensive pipeline combining DFT calculations with ML models to predict material properties with high accuracy.
+Open [http://localhost:3000](http://localhost:3000)
 
-**Tech:** Python • VASP • pymatgen • scikit-learn
+**Demo login:** `admin@acme.com` / `demo1234`
 
-### **[High-Throughput Screening of 2D Materials](https://github.com/YOUR_USERNAME/PROJECT_REPO)**
-Automated workflow for screening 2D materials for electronic and catalytic applications using DFT.
+## Project Structure
 
-**Tech:** Quantum ESPRESSO • ASE • Bash scripting
+```
+src/
+├── app/
+│   ├── (app)/          # Protected app pages
+│   │   ├── dashboard/
+│   │   ├── projects/
+│   │   ├── team/
+│   │   ├── calendar/
+│   │   ├── reports/
+│   │   └── settings/
+│   ├── (auth)/         # Login & register
+│   ├── api/            # REST API routes
+│   └── page.tsx        # Landing page
+├── components/
+│   ├── board/          # Kanban board & task modal
+│   ├── layout/         # Sidebar & header
+│   └── ui/             # Reusable UI components
+├── lib/                # Auth, DB, utilities
+└── types/              # TypeScript types
+prisma/
+├── schema.prisma       # Database schema
+└── seed.ts             # Demo data
+```
 
-### **[ML-Guided Materials Discovery](https://github.com/YOUR_USERNAME/PROJECT_REPO)**
-Machine learning models trained on materials database to predict novel compounds with desired properties.
+## Database Schema
 
-**Tech:** PyTorch • Matminer • Jupyter Notebooks
+```
+Company → Members (roles) → Users
+Company → Projects → Columns → Tasks
+Tasks → Comments + Activity Log
+Tasks → Assignee (User)
+```
 
----
+## Environment Variables
 
-## 📚 Research & Publications
-<!-- Update this section with your actual publications -->
-- **[Publication Title]** - *Journal Name* (Year) [[Link]()]
-- **[Conference Presentation]** - *Conference Name* (Year)
-
-## 🏫 Academic Background
-- **M.Sc. in Material Science** - IOE, Pulchowk Campus, Tribhuvan University (*[Year]-Present*)
-- **B.E. in [Your Bachelor's]** - [Your University] (*[Years]*)
-
----
-
-<p align="center">
-  <i>"The best way to predict the future of materials is to create it."</i>
-</p>
-
-<p align="center">
-  <img src="https://komarev.com/ghpvc/?username=YOUR_GITHUB_USERNAME&label=Profile%20Views&color=blue&style=flat" alt="Profile views" />
-</p>
+```env
+DATABASE_URL="file:./dev.db"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret-key"
+```
